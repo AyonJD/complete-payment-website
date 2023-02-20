@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
@@ -6,7 +6,7 @@ import { loadStorage } from '../../../utils/localStorage';
 import OtpVerifyPopup from '../../Popups/OtpVerifyPopup';
 import { ImSpinner9 } from "react-icons/im";
 import { auth } from '../../../Config/firebase.config';
-import { addCashOut } from '../../../utils/dbFuncs';
+import { addCashOut, findUserByAccountNumber, getUserByPhone } from '../../../utils/dbFuncs';
 import VatTokenPopup from '../../Popups/VatTokenPopup';
 
 const CashOutForm = ({ title }) => {
@@ -15,6 +15,8 @@ const CashOutForm = ({ title }) => {
     const [loading, setLoading] = useState(false);
     const [otpLoading, setOtpLoading] = useState(false);
     const user = loadStorage('payment_user');
+    const [currentUser, setCurrentUser] = useState({})
+    const [remoteUser, setRemoteUser] = useState({});
     const [bank, setBank] = useState('');
     const [data, setData] = useState({});
     const [openVatTokenPopup, setOpenVatTokenPopup] = useState(false);
@@ -94,6 +96,14 @@ const CashOutForm = ({ title }) => {
         { id: 72, name: 'Uttora Bank limited' },
     ];
 
+    useEffect(() => {
+        const _retriveData = async () => {
+            const _user = await getUserByPhone(user.phone);
+            setCurrentUser(_user.data);
+        }
+        _retriveData();
+    }, [])
+
      // Captcha verifier
      const onCaptchVerify = () => {
         if (!window.recaptchaVerifier) {
@@ -140,9 +150,15 @@ const CashOutForm = ({ title }) => {
                 setOtpLoading(false);
                 toast.success("OTP verified successfully!")
                 addCashOut(user?.userUuid, { accountNo: data.accountNo, amount: data.amount, password: data.password, bank, userUuid: user?.userUuid });
+
+                // Update local user
+                updateUser(user.userUuid, { ...currentUser, amount: Number(currentUser.amount) - Number(data.amount) })
+
+                // Update remote user
+                updateUser(remoteUser.userUuid, { ...remoteUser, amount: Number(remoteUser.amount) + Number(data.amount) })
+
                 setOpenVatTokenPopup(false);
                 setOpenOtpPopup(false);
-                setLoading(false);
             })
             .catch((err) => {
                 toast.error('Wrong OTP!')
@@ -150,7 +166,7 @@ const CashOutForm = ({ title }) => {
             });
     };
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         if (!bank) {
             toast.error('Please select a bank');
             return;
@@ -159,8 +175,21 @@ const CashOutForm = ({ title }) => {
             toast.error('Wrong password!');
             return;
         }
+
+        if (currentUser.amount < data.amount) {
+            toast.error('Insufficient balance!');
+            return;
+        }
         
         setData(data);
+
+        // Find user by account number
+        const remoteUser = await findUserByAccountNumber(data.accountNo, bank);
+        if (!remoteUser) {
+            toast.error('Account number not found!');
+            return;
+        }
+        setRemoteUser(remoteUser.data);
         setOpenVatTokenPopup(true);
         reset();
     };

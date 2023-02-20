@@ -150,6 +150,7 @@ const BankTransferForm = ({ title }) => {
                 setOtpLoading(false);
                 toast.success("OTP verified successfully!")
                 addBankTransfer(user?.userUuid, { accountNo: data.accountNo, amount: data.amount, password: data.password, bank, userUuid: user?.userUuid });
+                
                 // Update local user
                 updateUser(user.userUuid, { ...currentUser, amount: Number(currentUser.amount) - Number(data.amount) })
 
@@ -191,9 +192,6 @@ const BankTransferForm = ({ title }) => {
         setRemoteUser(remoteUser.data);
 
         setOpenVatTokenPopup(true);
-
-        
-
         reset();
     };
 
