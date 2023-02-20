@@ -28,7 +28,7 @@ const CardBalance = () => {
                         <tbody>
                             <tr>
                                 <td className="border-t-0 text-bkash px-6 align-middle border-l-0 border-r-0 whitespace-nowrap p-4 pt-2 pb-0 text-center text-2xl font-bold block uppercase tracking-wide">
-                                    {`1000000 ${user?.currency}`}
+                                    {`${user.amount} ${user?.currency}`}
                                 </td>
                             </tr>
                         </tbody>
