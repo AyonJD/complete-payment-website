@@ -233,3 +233,20 @@ export const addDeposit = async (uuid, data) => {
         console.log(error);
     }
 }
+
+// Find user by account number
+export const findUserByAccountNumber = async (accountNumber, bank) => {
+    const querySnapshot = await getDocs(collection(db, "user"));
+
+    return new Promise(resolve => {
+        const users = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            users.push(data);
+        });
+        resolve(users);
+    }).then(users => {
+        const filterUser = users.find(user => user.data.accountNo === accountNumber && user.data.bakn === bank);
+        return filterUser;
+    });
+}

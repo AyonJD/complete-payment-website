@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from 'react';
+import { getUserByPhone } from '../../../utils/dbFuncs';
 import { loadStorage } from '../../../utils/localStorage';
 
 const ProfileCard = () => {
   const [address, setAddress] = useState('');
   const [error, setError] = useState(null);
+  const [currentUser, setCurrentUser] = useState({})
   const user = loadStorage("payment_user");
+
+  useEffect(() => {
+    const _retriveData = async () => { 
+        const _user = await getUserByPhone(user.phone);
+        setCurrentUser(_user);
+    }
+    _retriveData();
+}, [])
   
   useEffect(() => {
     const geolocation = navigator.geolocation;
@@ -50,7 +60,7 @@ const ProfileCard = () => {
               <div className="relative">
                 <img
                   alt="..."
-                  src={user?.image}
+                  src={currentUser?.data?.image}
                   className="shadow-xl rounded-full w-[150px] align-middle border-none -mt-16 "
                 />
               </div>
@@ -60,7 +70,7 @@ const ProfileCard = () => {
                 <div className="mr-4 p-3 text-center">
                   <span className="text-md font-bold text_bkash">Current Balance</span>
                   <span className="text-xl font-bold block uppercase tracking-wide text_bkash">
-                    {`1000000 ${ user?.currency}` }
+                    {`${currentUser?.data?.amount} ${ currentUser?.data?.currency}` }
                   </span>
                 </div>
               </div>
@@ -68,7 +78,7 @@ const ProfileCard = () => {
           </div>
           <div className="text-center">
             <h3 className="text-xl font-semibold leading-normal mb-2 text-gray-700 ">
-              { user?.name}
+              { currentUser?.data?.name}
             </h3>
             <div className="text-sm leading-normal mt-0 mb-2 text-gray-400 font-bold uppercase">
               <i className="fas fa-map-marker-alt mr-2 text-lg text-gray-400"></i>{" "}

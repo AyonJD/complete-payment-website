@@ -1,8 +1,18 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { getUserByPhone } from '../../../utils/dbFuncs';
 import { loadStorage } from '../../../utils/localStorage';
 
 const CardBalance = () => {
     const user = loadStorage("payment_user");
+    const [currentUser, setCurrentUser] = useState({})
+
+    useEffect(() => {
+        const _retriveData = async () => { 
+            const _user = await getUserByPhone(user.phone);
+            setCurrentUser(_user);
+        }
+        _retriveData();
+    }, [])
 
     return (
         <div className={`relative flex flex-col min-w-0 break-words bg_bkash mb-6 shadow-lg rounded text-white py-5`}>
@@ -28,7 +38,7 @@ const CardBalance = () => {
                         <tbody>
                             <tr>
                                 <td className="border-t-0 text-bkash px-6 align-middle border-l-0 border-r-0 whitespace-nowrap p-4 pt-2 pb-0 text-center text-2xl font-bold block uppercase tracking-wide">
-                                    {`${user.amount} ${user?.currency}`}
+                                    {`${currentUser?.data?.amount} ${currentUser?.data?.currency}`}
                                 </td>
                             </tr>
                         </tbody>

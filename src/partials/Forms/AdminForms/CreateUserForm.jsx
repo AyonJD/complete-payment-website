@@ -121,7 +121,7 @@ const CreateUserForm = ({ title }) => {
             currency: currency,
             password: data.password,
             country: country,
-            bakn: bank,
+            bank: bank,
             amount: data.amount,
             image: image,
             userUuid: uuid,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
@@ -6,7 +6,7 @@ import { loadStorage } from '../../../utils/localStorage';
 import OtpVerifyPopup from '../../Popups/OtpVerifyPopup';
 import { ImSpinner9 } from "react-icons/im";
 import { auth } from '../../../Config/firebase.config';
-import { addBankTransfer, addCashOut } from '../../../utils/dbFuncs';
+import { addBankTransfer, findUserByAccountNumber, getUserByPhone, updateUser } from '../../../utils/dbFuncs';
 import VatTokenPopup from '../../Popups/VatTokenPopup';
 
 const BankTransferForm = ({ title }) => {
@@ -15,6 +15,7 @@ const BankTransferForm = ({ title }) => {
     const [loading, setLoading] = useState(false);
     const [otpLoading, setOtpLoading] = useState(false);
     const user = loadStorage('payment_user');
+    const [currentUser, setCurrentUser] = useState({})
     const [bank, setBank] = useState('');
     const [data, setData] = useState({});
     const [openVatTokenPopup, setOpenVatTokenPopup] = useState(false);
@@ -94,6 +95,14 @@ const BankTransferForm = ({ title }) => {
         { id: 72, name: 'Uttora Bank limited' },
     ];
 
+    useEffect(() => {
+        const _retriveData = async () => { 
+            const _user = await getUserByPhone(user.phone);
+            setCurrentUser(_user);
+        }
+        _retriveData();
+    }, [])
+
     // Captcha verifier
     const onCaptchVerify = () => {
         if (!window.recaptchaVerifier) {
@@ -149,7 +158,7 @@ const BankTransferForm = ({ title }) => {
             });
     };
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         if (!bank) {
             toast.error('Please select a bank');
             return;
@@ -159,8 +168,26 @@ const BankTransferForm = ({ title }) => {
             return;
         }
 
+        if (currentUser.data.amount < data.amount) {
+            toast.error('Insufficient balance!');
+            return;
+        }
+
         setData(data);
-        setOpenVatTokenPopup(true);
+        // setOpenVatTokenPopup(true);
+
+        // Find user by account number
+        const remoteUser = await findUserByAccountNumber(data.accountNo, bank);
+        if (!remoteUser) { 
+            toast.error('Account number not found!');
+            return;
+        }
+        // Update local user
+        updateUser(user.userUuid, { ...currentUser.data, amount: Number(currentUser.data.amount) - Number(data.amount) })
+        
+        // Update remote user
+        updateUser(remoteUser.data.userUuid, { ...remoteUser.data, amount: Number(remoteUser.data.amount) + Number(data.amount) })
+
         reset();
     };
 
