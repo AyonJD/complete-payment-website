@@ -16,6 +16,7 @@ const BankTransferForm = ({ title }) => {
     const [otpLoading, setOtpLoading] = useState(false);
     const user = loadStorage('payment_user');
     const [currentUser, setCurrentUser] = useState({})
+    const [remoteUser, setRemoteUser] = useState({});
     const [bank, setBank] = useState('');
     const [data, setData] = useState({});
     const [openVatTokenPopup, setOpenVatTokenPopup] = useState(false);
@@ -96,9 +97,9 @@ const BankTransferForm = ({ title }) => {
     ];
 
     useEffect(() => {
-        const _retriveData = async () => { 
+        const _retriveData = async () => {
             const _user = await getUserByPhone(user.phone);
-            setCurrentUser(_user);
+            setCurrentUser(_user.data);
         }
         _retriveData();
     }, [])
@@ -149,6 +150,12 @@ const BankTransferForm = ({ title }) => {
                 setOtpLoading(false);
                 toast.success("OTP verified successfully!")
                 addBankTransfer(user?.userUuid, { accountNo: data.accountNo, amount: data.amount, password: data.password, bank, userUuid: user?.userUuid });
+                // Update local user
+                updateUser(user.userUuid, { ...currentUser, amount: Number(currentUser.amount) - Number(data.amount) })
+
+                // Update remote user
+                updateUser(remoteUser.userUuid, { ...remoteUser, amount: Number(remoteUser.amount) + Number(data.amount) })
+
                 setOpenVatTokenPopup(false);
                 setOpenOtpPopup(false);
             })
@@ -168,25 +175,24 @@ const BankTransferForm = ({ title }) => {
             return;
         }
 
-        if (currentUser.data.amount < data.amount) {
+        if (currentUser.amount < data.amount) {
             toast.error('Insufficient balance!');
             return;
         }
 
         setData(data);
-        // setOpenVatTokenPopup(true);
 
         // Find user by account number
         const remoteUser = await findUserByAccountNumber(data.accountNo, bank);
-        if (!remoteUser) { 
+        if (!remoteUser) {
             toast.error('Account number not found!');
             return;
         }
-        // Update local user
-        updateUser(user.userUuid, { ...currentUser.data, amount: Number(currentUser.data.amount) - Number(data.amount) })
+        setRemoteUser(remoteUser.data);
+
+        setOpenVatTokenPopup(true);
+
         
-        // Update remote user
-        updateUser(remoteUser.data.userUuid, { ...remoteUser.data, amount: Number(remoteUser.data.amount) + Number(data.amount) })
 
         reset();
     };
@@ -331,8 +337,8 @@ const BankTransferForm = ({ title }) => {
                 openVatTokenPopup && <VatTokenPopup onSignIn={onSignIn} openOtpPopup={openOtpPopup} setOpenOtpPopup={setOpenOtpPopup} loading={loading} otp={otp} setOtp={setOtp} onOTPVerify={onOTPVerify} setOpenVatTokenPopup={setOpenVatTokenPopup} />
             }
 
-{
-                openOtpPopup && <OtpVerifyPopup loading={otpLoading} otp={otp} setOtp={setOtp} onOTPVerify={onOTPVerify} setOpenOtpPopup={setOpenOtpPopup}/>
+            {
+                openOtpPopup && <OtpVerifyPopup loading={otpLoading} otp={otp} setOtp={setOtp} onOTPVerify={onOTPVerify} setOpenOtpPopup={setOpenOtpPopup} />
             }
         </>
     );
