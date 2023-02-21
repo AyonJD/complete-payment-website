@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaEdit } from 'react-icons/fa';
 import { getAllUser } from '../../../utils/dbFuncs';
 
 const UserList = () => {
@@ -29,10 +30,10 @@ const UserList = () => {
 
     return (
         <>
-            <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
-                <div className="rounded-t mb-0 px-4 py-3 border-0">
+            <div className={`relative flex flex-col min-w-0 break-words bg-white w-full mb-6  rounded ${windowWidth > 600 ? 'shadow-lg' : ''}`}>
+                <div className={`rounded-t mb-0 px-4 py-3 border-0 ${windowWidth <= 600 ? 'shadow-lg' : ''}`}>
                     <div className="flex flex-wrap items-center">
-                        <div className="relative w-full px-4 max-w-full flex-grow flex-1">
+                        <div className={`relative w-full px-4 max-w-full flex-grow flex-1`}>
                             <h3 className="font-semibold text-base text-gray-700">
                                 Account Information
                             </h3>
@@ -60,13 +61,16 @@ const UserList = () => {
                                             <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                                                 Akhama(NID)
                                             </th>
+                                            <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                                                Edit User
+                                            </th>
 
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {
                                             allUser.map((user, index) => (
-                                                <tr key={index} onClick={() => navigate(`/admin/user-list/${user.data.userUuid}`)}>
+                                                <tr key={index} >
                                                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
                                                         {user?.data?.name}
                                                     </td>
@@ -79,6 +83,11 @@ const UserList = () => {
                                                     <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
                                                         {user?.data?.nidNo}
                                                     </td>
+                                                    <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 ">
+                                                        <FaEdit
+                                                            onClick={() => navigate(`/admin/user-list/${user.data.userUuid}`)}
+                                                            className='text-lg text-gray-600 cursor-pointer ml-5' />
+                                                    </td>
                                                 </tr>
                                             ))
                                         }
@@ -90,32 +99,32 @@ const UserList = () => {
                         <>
                             <div className="block w-full overflow-x-auto">
                                 <table className="items-center w-full bg-transparent border-collapse">
-                                    <thead className="thead-light">
+                                    <thead className="main_bg">
                                         {
                                             allUser.map((user, index) => (
-                                                <>
-                                                    <tr>
-                                                        <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                                                <div onClick={() => navigate(`/admin/user-list/${user.data.userUuid}`)} className='my-7 w-full bg-white'>
+                                                    <tr className=''>
+                                                        <th className="w-[100vw] px-6 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                                                             Name : {user?.data?.name}
                                                         </th>
 
                                                     </tr>
                                                     <tr>
-                                                        <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                                                        <th className="px-6 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                                                             Phone : {user?.data?.phone}
                                                         </th>
                                                     </tr>
                                                     <tr>
-                                                        <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                                                        <th className="px-6 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                                                             Account Number :  {user?.data?.accountNo}
                                                         </th>
                                                     </tr>
                                                     <tr>
-                                                        <th className="px-6 bg-gray-50 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                                                        <th className="px-6 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                                                             Akhama(NID) :  {user?.data?.nidNo}
                                                         </th>
                                                     </tr>
-                                                </>
+                                                </div>
                                             ))
                                         }
                                     </thead>
