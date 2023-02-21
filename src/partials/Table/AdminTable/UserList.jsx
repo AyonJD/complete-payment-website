@@ -33,38 +33,38 @@ const UserList = () => {
     // Get the search value from input
     const handleSearch = (event) => {
         const term = event.target.value.trim();
-    setSearchTerm(term);
-    setIsLoading(true);
-    debouncedSearch(term);
-      };
-    
-      const debounce = (func, delay) => {
+        setSearchTerm(term);
+        setIsLoading(true);
+        debouncedSearch(term);
+    };
+
+    const debounce = (func, delay) => {
         let timerId;
         return function () {
-          const context = this;
-          const args = arguments;
-          clearTimeout(timerId);
-          timerId = setTimeout(() => {
-            func.apply(context, args);
-            setIsLoading(false);
-          }, delay);
+            const context = this;
+            const args = arguments;
+            clearTimeout(timerId);
+            timerId = setTimeout(() => {
+                func.apply(context, args);
+                setIsLoading(false);
+            }, delay);
         };
-      };
-    
-      const searchUsers = (term) => {
+    };
+
+    const searchUsers = (term) => {
         const filteredUsers = allUser.filter((user) => {
-          return Object.values(user.data).some((value) =>
-            value.toString().toLowerCase().includes(term.toLowerCase())
-          );
+            return Object.values(user.data).some((value) =>
+                value.toString().toLowerCase().includes(term.toLowerCase())
+            );
         });
-    
+
         if (term === '') {
-          setAllUser(allUser);
+            setAllUser(allUser);
         } else {
-          setAllUser(filteredUsers);
+            setAllUser(filteredUsers);
         }
-      };
-    
+    };
+
     const debouncedSearch = debounce(searchUsers, 1000);
 
     return (
@@ -79,8 +79,8 @@ const UserList = () => {
                         </div>
                         <div className={`relative w-full px-4 max-w-full flex-grow flex-1 text-right`}>
                             <input type="text" className={`customInputClass border-0 px-3 py-2 placeholder-gray-300 text-gray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full md:w-1/2 ease-linear transition-all duration-150 ${windowWidth <= 460 ? 'mt-4' : ''}`} placeholder="Search"
-                            onChange={handleSearch}
-                            onKeyUp={() => debouncedSearch(searchTerm)}
+                                onChange={handleSearch}
+                                onKeyUp={() => debouncedSearch(searchTerm)}
                             />
                         </div>
 
