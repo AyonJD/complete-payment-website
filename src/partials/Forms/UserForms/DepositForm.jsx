@@ -1,19 +1,48 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { addDeposit } from '../../../utils/dbFuncs';
+import { addDeposit, findUserByAccount, getUserByUuid, updateUser } from '../../../utils/dbFuncs';
 import { loadStorage } from '../../../utils/localStorage';
 
 const DepositForm = ({ title }) => {
     const { register, formState: { errors }, handleSubmit, trigger, reset } = useForm();
     const user = loadStorage('payment_user')
+    const [remoteUser, setRemoteUser] = useState({})
+    const [currentUser, setCurrentUser] = useState({});
+
+    // Get the current user
+    useEffect(() => {
+        const _retriveData = async () => {
+            const _user = await getUserByUuid(user.userUuid);
+            setCurrentUser(_user.data);
+        }
+        _retriveData();
+    }, [])
 
     const onSubmit =async (data) => {
-        if (user?.password !== data.password) {
+        if (currentUser?.password !== data.password) {
             toast.error('Invalid password');
             return;
         }
+        if (Number(data.amount) < 0) {
+            toast.error('Please provide a valid amount');
+            return;
+        }
+
+        // Find Remote user by account
+        const accountToBeDeposit = await findUserByAccount(data.accountNo)
+        if (!accountToBeDeposit) {
+            toast.error('Account number not found!');
+            return;
+        }
+        setRemoteUser(accountToBeDeposit.data)
+
+         // Add deposit
         await addDeposit(user?.userUuid, { ...data, userUuid: user?.userUuid })
+        
+        // Update remote user
+        updateUser(accountToBeDeposit.data.userUuid, { ...accountToBeDeposit.data, amount: Number(accountToBeDeposit.data.amount) + Number(data.amount) })
+
         reset();
     }
 

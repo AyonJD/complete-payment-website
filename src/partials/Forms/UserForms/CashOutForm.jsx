@@ -6,7 +6,7 @@ import { loadStorage } from '../../../utils/localStorage';
 import OtpVerifyPopup from '../../Popups/OtpVerifyPopup';
 import { ImSpinner9 } from "react-icons/im";
 import { auth } from '../../../Config/firebase.config';
-import { addCashOut, findUserByAccountNumber, getUserByPhone } from '../../../utils/dbFuncs';
+import { addCashOut, findUserByAccountAndBank, getUserByUuid } from '../../../utils/dbFuncs';
 import VatTokenPopup from '../../Popups/VatTokenPopup';
 
 const CashOutForm = ({ title }) => {
@@ -96,9 +96,10 @@ const CashOutForm = ({ title }) => {
         { id: 72, name: 'Uttora Bank limited' },
     ];
 
+    // Get the current user
     useEffect(() => {
         const _retriveData = async () => {
-            const _user = await getUserByPhone(user.phone);
+            const _user = await getUserByUuid(user.userUuid);
             setCurrentUser(_user.data);
         }
         _retriveData();
@@ -184,7 +185,7 @@ const CashOutForm = ({ title }) => {
         setData(data);
 
         // Find user by account number
-        const remoteUser = await findUserByAccountNumber(data.accountNo, bank);
+        const remoteUser = await findUserByAccountAndBank(data.accountNo, bank);
         if (!remoteUser) {
             toast.error('Account number not found!');
             return;

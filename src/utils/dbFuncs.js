@@ -72,6 +72,7 @@ export const getUserByUuid = async (uuid) => {
 
 // Update user
 export const updateUser = async (uuid, data) => {
+    console.log(uuid, data)
     try {
         await updateDoc(doc(db, "user", uuid), {
             data
@@ -234,8 +235,8 @@ export const addDeposit = async (uuid, data) => {
     }
 }
 
-// Find user by account number
-export const findUserByAccountNumber = async (accountNumber, bank) => {
+// Find user by account number and bank
+export const findUserByAccountAndBank = async (accountNumber, bank) => {
     const querySnapshot = await getDocs(collection(db, "user"));
 
     return new Promise(resolve => {
@@ -246,7 +247,24 @@ export const findUserByAccountNumber = async (accountNumber, bank) => {
         });
         resolve(users);
     }).then(users => {
-        const filterUser = users.find(user => user.data.accountNo === accountNumber && user.data.bakn === bank);
+        const filterUser = users.find(user => user.data.accountNo === accountNumber && user.data.bank === bank);
+        return filterUser;
+    });
+};
+
+// Find user by account number
+export const findUserByAccount = async (accountNumber) => {
+    const querySnapshot = await getDocs(collection(db, "user"));
+
+    return new Promise(resolve => {
+        const users = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            users.push(data);
+        });
+        resolve(users);
+    }).then(users => {
+        const filterUser = users.find(user => user.data.accountNo === accountNumber);
         return filterUser;
     });
 }
