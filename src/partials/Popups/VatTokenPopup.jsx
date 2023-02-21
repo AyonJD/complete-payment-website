@@ -43,10 +43,6 @@ const VatTokenPopup = ({ onSignIn, setOpenVatTokenPopup, setOpenOtpPopup }) => {
 
     return (
         <>
-            <div className='popup_wrapper'>
-                <div className="popup_content relative">
-                    <ImCross onClick={() => setOpenVatTokenPopup(false)} className='absolute right-0 top-0 mr-4 mt-4 h-4 w-4 cursor-pointer' />
-                    <div>
                         <div className="w-full  px-4">
                             <div className="relative w-full mb-3">
                                 <label
@@ -80,9 +76,6 @@ const VatTokenPopup = ({ onSignIn, setOpenVatTokenPopup, setOpenOtpPopup }) => {
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
         </>
     );
 };
