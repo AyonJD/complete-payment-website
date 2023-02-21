@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEdit } from 'react-icons/fa';
 import { getAllUser } from '../../../utils/dbFuncs';
@@ -6,7 +6,9 @@ import { getAllUser } from '../../../utils/dbFuncs';
 const UserList = () => {
     const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
     const [allUser, setAllUser] = React.useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Function to get the window width in pixels
     function getWindowWidth() {
@@ -28,15 +30,58 @@ const UserList = () => {
         fetchData();
     }, []);
 
+    // Get the search value from input
+    const handleSearch = (event) => {
+        const term = event.target.value.trim();
+    setSearchTerm(term);
+    setIsLoading(true);
+    debouncedSearch(term);
+      };
+    
+      const debounce = (func, delay) => {
+        let timerId;
+        return function () {
+          const context = this;
+          const args = arguments;
+          clearTimeout(timerId);
+          timerId = setTimeout(() => {
+            func.apply(context, args);
+            setIsLoading(false);
+          }, delay);
+        };
+      };
+    
+      const searchUsers = (term) => {
+        const filteredUsers = allUser.filter((user) => {
+          return Object.values(user.data).some((value) =>
+            value.toString().toLowerCase().includes(term.toLowerCase())
+          );
+        });
+    
+        if (term === '') {
+          setAllUser(allUser);
+        } else {
+          setAllUser(filteredUsers);
+        }
+      };
+    
+    const debouncedSearch = debounce(searchUsers, 1000);
+
     return (
         <>
             <div className={`relative flex flex-col min-w-0 break-words bg-white w-full mb-6  rounded ${windowWidth > 600 ? 'shadow-lg' : ''}`}>
-                <div className={`rounded-t mb-0 px-4 py-3 border-0 ${windowWidth <= 600 ? 'shadow-lg' : ''}`}>
-                    <div className="flex flex-wrap items-center">
+                <div className={`rounded-t mb-0 px-4 py-4 border-0 ${windowWidth <= 600 ? 'shadow-lg' : ''}`}>
+                    <div className={`flex items-center justify-between ${windowWidth <= 460 ? 'flex-col' : ''}`}>
                         <div className={`relative w-full px-4 max-w-full flex-grow flex-1`}>
                             <h3 className="font-semibold text-base text-gray-700">
                                 Account Information
                             </h3>
+                        </div>
+                        <div className={`relative w-full px-4 max-w-full flex-grow flex-1 text-right`}>
+                            <input type="text" className={`customInputClass border-0 px-3 py-2 placeholder-gray-300 text-gray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full md:w-1/2 ease-linear transition-all duration-150 ${windowWidth <= 460 ? 'mt-4' : ''}`} placeholder="Search"
+                            onChange={handleSearch}
+                            onKeyUp={() => debouncedSearch(searchTerm)}
+                            />
                         </div>
 
                     </div>
