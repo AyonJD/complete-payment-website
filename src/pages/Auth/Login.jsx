@@ -44,11 +44,10 @@ const Login = () => {
 
     // SignIn Handler
     const onSignIn = async (data) => {
-        const user = await getUserByPhone("+" + phone);
-
-        if (!user) return toast.error("User not found!");
-        if (user?.data?.password !== data.password) return toast.error("Password not matched!");
-        setUser(user.data);
+        const userFromDB = await getUserByPhone("+" + phone);
+        if (!userFromDB) return toast.error("User not found!");
+        if (userFromDB?.data?.password !== data.password) return toast.error("Password not matched!");
+        setUser(userFromDB.data);
         
         setLoading(true);
         onCaptchVerify();
@@ -66,7 +65,6 @@ const Login = () => {
         signInWithPhoneNumber(auth, formatPhone, appVerifier)
             .then((confirmationResult) => {
                 window.confirmationResult = confirmationResult;
-                console.log(confirmationResult)
                 setLoading(false);
                 setShowOTP(true);
                 toast.success("OTP sended successfully!");
@@ -87,7 +85,7 @@ const Login = () => {
                 setLoading(false);
                 toast.success("OTP verified successfully!")
 
-                if (user?.data?.role === "admin") {
+                if (user.role === "admin") {
                     return navigate("/admin/create-user");
                 } else {
                     navigate("/");
@@ -96,6 +94,7 @@ const Login = () => {
             })
             .catch((err) => {
                 toast.error('Wrong OTP!')
+                console.log(err)
                 setLoading(false);
             });
     };
